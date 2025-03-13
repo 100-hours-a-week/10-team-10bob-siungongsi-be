@@ -5,7 +5,6 @@ import org.bob.siungongsi.controller.dto.AuthResponse.LoginSuccessResponse;
 import org.bob.siungongsi.dto.ApiResponseWrapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "회원 인증 API", description = "회원 로그인, 탈퇴 및 약관 조회 API") // Swagger에서 API 그룹 지정
 public interface AuthControllerSpec {
 
-  /** 로그인 API */
   @Operation(
       summary = "로그인",
       description = "회원 인증 후 JWT 토큰을 반환하는 API (로그인 페이지에서 사용)",
@@ -64,10 +62,8 @@ public interface AuthControllerSpec {
                   })
             })
       })
-  ResponseEntity<ApiResponseWrapper<LoginSuccessResponse>> loginUser(
-      @RequestBody AuthRequest requestDto);
+  ResponseEntity<ApiResponseWrapper<LoginSuccessResponse>> loginUser(AuthRequest requestDto);
 
-  /** 회원가입 API */
   @Operation(
       summary = "회원가입",
       description = "회원 정보를 등록하는 API (회원가입 페이지에서 사용)",
@@ -125,9 +121,8 @@ public interface AuthControllerSpec {
                   })
             })
       })
-  ResponseEntity<ApiResponseWrapper<Object>> registerUser(@RequestBody AuthRequest requestDto);
+  ResponseEntity<ApiResponseWrapper<?>> registerUser(AuthRequest requestDto);
 
-  /** 약관 조회 API */
   @Operation(
       summary = "약관 조회",
       description = "회원가입 시 필요한 약관 정보를 가져오는 API (회원가입 페이지에서 사용)",
