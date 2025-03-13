@@ -45,12 +45,15 @@ tasks.named('test') {
 // 깃 커밋 시 포매팅
 spotless {
     java {
-        target 'src/**/*.java' // 포매팅 대상 디렉토리
-        googleJavaFormat().aosp() // 구글 스타일 포매팅, aosp()는 Android Open Source Project의 스타일을 따르는 옵션
-        indentWithTabs(4)
-        importOrder('java', 'javax', 'org', 'com')
-        removeUnusedImports()
+        target("src/**/*.java") // 포매팅 대상 디렉토리
+        googleJavaFormat() // Google Java Format 적용 (기본 2칸)
+
+        importOrder("java", "javax", "org", "com") // import 순서 지정
         trimTrailingWhitespace()
         endWithNewline()
+        removeUnusedImports() // 사용하지 않는 import 제거
+
+        // Eclipse 포맷터 적용 (4칸 인덴트 강제 적용)
+        eclipse().configFile("eclipse-java-style.xml")
     }
 }
