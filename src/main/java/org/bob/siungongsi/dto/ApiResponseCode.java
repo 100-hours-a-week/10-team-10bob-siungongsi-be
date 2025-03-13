@@ -3,11 +3,13 @@ package org.bob.siungongsi.dto;
 public enum ApiResponseCode {
 	// 공시 관련 응답 코드 (1)
 	GONGSI_LIST_SUCCESS(1200, "get_gongsi_list_success"),
+	GONGSI_DETAIL_SUCCESS(1201, "get_detail_gongsi_success"),
 	GONGSI_INVALID_SORT_TYPE(1400, "invalid_sort_type"),
 	GONGSI_INVALID_COMPANY_ID(1401, "invalid_company_id"),
 	GONGSI_INVALID_DATE_PAIR(1402, "invalid_date_pair"),
 	GONGSI_NOT_FOUND(1403, "gongsi_not_found"),
 	GONGSI_COMPANY_NOT_FOUND(1404, "company_not_found"),
+	GONGSI_INVALID_GONGSI_ID(1405, "invalid_gongsi_id"),
 	GONGSI_INTERNAL_SERVER_ERROR(1500, "internal_server_error"),
 
 	// 인증 관련 응답 코드 (2)
@@ -34,7 +36,7 @@ public enum ApiResponseCode {
 	COMPANY_INTERNAL_SERVER_ERROR(4500, "internal_server_error"),
 
 	// 알림 관련 응답 코드 (5)
-	NOTIFICATION_RECOMMENDED_COMPANY_SUCCESS(5200, "get_recomended_company_success"),
+	NOTIFICATION_RECOMMENDED_COMPANY_SUCCESS(5200, "get_recommended_company_success"),
 	NOTIFICATION_SUBSCRIPTION_SUCCESS(5201, "notification_subscription_success"),
 	NOTIFICATION_UNSUBSCRIBE_SUCCESS(5202, "unsubscribe_notification_success"),
 	NOTIFICATION_REQUIRED_AUTHORIZATION(5400, "required_authorization"),
