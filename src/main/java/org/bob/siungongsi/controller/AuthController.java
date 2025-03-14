@@ -23,8 +23,7 @@ public class AuthController implements AuthControllerSpec {
 
   @Override
   @PostMapping("/register")
-  public ResponseEntity<ApiResponseWrapper<Object>> registerUser(
-      @RequestBody AuthRequest authRequest) {
+  public ResponseEntity<ApiResponseWrapper<?>> registerUser(@RequestBody AuthRequest authRequest) {
 
     String socialId = authRequest.socialId();
     String accessToken = authRequest.accessToken();
