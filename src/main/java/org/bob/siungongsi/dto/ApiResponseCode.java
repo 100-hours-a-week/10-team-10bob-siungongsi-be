@@ -21,7 +21,7 @@ public enum ApiResponseCode {
   AUTH_TERMS_NOT_FOUND(2403, "terms_not_found"),
   AUTH_INTERNAL_SERVER_ERROR(2500, "internal_server_error"),
 
-  // 알림 관련 응답 코드 (3)
+  // 유저 관련 응답 코드 (3)
   USER_GET_STATUS(3200, "get_notification_status"),
   USER_UPDATE_STATUS_SUCCESS(3201, "update_notification_status_success"),
   USER_REQUIRED_AUTHORIZATION(3400, "required_authorization"),
