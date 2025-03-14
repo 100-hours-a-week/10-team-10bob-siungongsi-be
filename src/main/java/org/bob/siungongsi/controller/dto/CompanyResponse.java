@@ -16,4 +16,10 @@ public class CompanyResponse {
       return new CompanyNameResponse(companyId, companyName);
     }
   }
+
+  public record CompanyInfo(int id, String name, double prdyCtr, boolean isSubscribed) {
+    public static CompanyInfo of(int id, String name, double prdyCtr, boolean isSubscribed) {
+      return new CompanyInfo(id, name, prdyCtr, isSubscribed);
+    }
+  }
 }
