@@ -21,6 +21,7 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -53,8 +54,5 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
         removeUnusedImports() // 사용하지 않는 import 제거
-
-        // Eclipse 포맷터 적용 (4칸 인덴트 강제 적용)
-        eclipse().configFile("eclipse-java-style.xml")
     }
 }
