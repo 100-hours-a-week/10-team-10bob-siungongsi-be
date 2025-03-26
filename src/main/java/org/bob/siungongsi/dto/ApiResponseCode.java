@@ -9,6 +9,9 @@ public enum ApiResponseCode {
   GONGSI_INVALID_DATE_PAIR(1402, "invalid_date_pair"),
   GONGSI_NOT_FOUND(1403, "gongsi_not_found"),
   GONGSI_COMPANY_NOT_FOUND(1404, "company_not_found"),
+  GONGSI_INVALID_PAGE_SIZE(1405, "invalid_page_size"),
+  GONGSI_INVALID_PAGE_NUMBER(1406, "invalid_page_number"),
+  GONGSI_BAD_REQUEST(1499, "invalid_request_parameters"),
   GONGSI_INTERNAL_SERVER_ERROR(1500, "internal_server_error"),
 
   // 인증 관련 응답 코드 (2)
