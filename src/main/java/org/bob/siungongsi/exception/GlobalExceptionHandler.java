@@ -3,6 +3,8 @@ package org.bob.siungongsi.exception;
 import org.bob.siungongsi.dto.ApiResponseCode;
 import org.bob.siungongsi.dto.ApiResponseWrapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,7 +13,6 @@ import io.sentry.Sentry;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
   // CustomException을 처리하는 핸들러
   @ExceptionHandler(CustomException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST) // 400 오류 반환
@@ -20,12 +21,45 @@ public class GlobalExceptionHandler {
     return ApiResponseWrapper.error(ex.getErrorCode());
   }
 
-  // IllegalArgumentException 같은 일반적인 예외 처리
   @ExceptionHandler(IllegalArgumentException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST) // 400 오류 반환
   public ApiResponseWrapper handleIllegalArgumentException(IllegalArgumentException ex) {
     Sentry.captureException(ex); // Sentry에 예외 전송
-    return ApiResponseWrapper.error(ApiResponseCode.GONGSI_INVALID_SORT_TYPE);
+    ApiResponseCode errorCode = mapIllegalArgumentMessage(ex.getMessage());
+    return ApiResponseWrapper.error(errorCode);
+  }
+
+  private ApiResponseCode mapIllegalArgumentMessage(String message) {
+    if (message != null) {
+      if (message.contains("Invalid sort type")) {
+        return ApiResponseCode.GONGSI_INVALID_SORT_TYPE;
+      } else if (message.contains("Company not found")) {
+        return ApiResponseCode.GONGSI_COMPANY_NOT_FOUND;
+      } else if (message.contains("Invalid date pair") || message.contains("Invalid date format")) {
+        return ApiResponseCode.GONGSI_INVALID_DATE_PAIR;
+      } else if (message.contains("Page size") || message.contains("exceeds maximum")) {
+        return ApiResponseCode.GONGSI_INVALID_PAGE_SIZE;
+      } else if (message.contains("Page") || message.contains("negative")) {
+        return ApiResponseCode.GONGSI_INVALID_PAGE_NUMBER;
+      }
+    }
+    return ApiResponseCode.GONGSI_BAD_REQUEST;
+  }
+
+  // HttpMessageNotReadableException 처리 (JSON 파싱 에러 등)
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST) // 400 오류 반환
+  public ApiResponseWrapper handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+    Sentry.captureException(ex); // Sentry에 예외 전송
+    return ApiResponseWrapper.error(ApiResponseCode.USER_INVALID_DATA_FORMAT);
+  }
+
+  // MissingRequestHeaderException 처리 (필수 헤더 누락)
+  @ExceptionHandler(MissingRequestHeaderException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST) // 400 오류 반환
+  public ApiResponseWrapper handleMissingRequestHeader(MissingRequestHeaderException ex) {
+    Sentry.captureException(ex); // Sentry에 예외 전송
+    return ApiResponseWrapper.error(ApiResponseCode.USER_REQUIRED_AUTHORIZATION);
   }
 
   // NullPointerException 같은 예상치 못한 예외 처리
