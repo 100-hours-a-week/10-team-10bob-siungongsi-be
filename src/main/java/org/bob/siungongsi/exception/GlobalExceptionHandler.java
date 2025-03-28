@@ -20,12 +20,29 @@ public class GlobalExceptionHandler {
     return ApiResponseWrapper.error(ex.getErrorCode());
   }
 
-  // IllegalArgumentException 같은 일반적인 예외 처리
   @ExceptionHandler(IllegalArgumentException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST) // 400 오류 반환
   public ApiResponseWrapper handleIllegalArgumentException(IllegalArgumentException ex) {
     Sentry.captureException(ex); // Sentry에 예외 전송
-    return ApiResponseWrapper.error(ApiResponseCode.GONGSI_INVALID_SORT_TYPE);
+    ApiResponseCode errorCode = mapIllegalArgumentMessage(ex.getMessage());
+    return ApiResponseWrapper.error(errorCode);
+  }
+
+  private ApiResponseCode mapIllegalArgumentMessage(String message) {
+    if (message != null) {
+      if (message.contains("Invalid sort type")) {
+        return ApiResponseCode.GONGSI_INVALID_SORT_TYPE;
+      } else if (message.contains("Company not found")) {
+        return ApiResponseCode.GONGSI_COMPANY_NOT_FOUND;
+      } else if (message.contains("Invalid date pair") || message.contains("Invalid date format")) {
+        return ApiResponseCode.GONGSI_INVALID_DATE_PAIR;
+      } else if (message.contains("Page size") || message.contains("exceeds maximum")) {
+        return ApiResponseCode.GONGSI_INVALID_PAGE_SIZE;
+      } else if (message.contains("Page") || message.contains("negative")) {
+        return ApiResponseCode.GONGSI_INVALID_PAGE_NUMBER;
+      }
+    }
+    return ApiResponseCode.GONGSI_BAD_REQUEST;
   }
 
   // NullPointerException 같은 예상치 못한 예외 처리

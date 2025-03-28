@@ -74,6 +74,18 @@ public class GongsiService {
     return Long.valueOf(gongsi.getCompany().getId());
   }
 
+  private void validatePaginationParams(Integer page, Integer size) {
+    if (page == null || page < 1) {
+      throw new IllegalArgumentException("Page number cannot be negative or less than 1");
+    }
+    if (size == null || size < 1) {
+      throw new IllegalArgumentException("Page size cannot be negative or less than 1");
+    }
+    if (size > 100) {
+      throw new IllegalArgumentException("Page size exceeds maximum allowed value (100)");
+    }
+  }
+
   public GongsiResponse.GongsiListResponse getGongsiList(
       Long companyId,
       String sort,
@@ -82,6 +94,8 @@ public class GongsiService {
       Integer size,
       String startDate,
       String endDate) {
+
+    validatePaginationParams(page, size);
 
     LocalDate parsedStartDate = null;
     LocalDate parsedEndDate = null;
