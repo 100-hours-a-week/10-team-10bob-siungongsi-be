@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ENV="${SPRING_PROFILES_ACTIVE}"
+ENV="${SPRING_PROFILES_ACTIVE:-prod}"
 BUCKET="siungongsi-env"
 OBJECT_KEY="$ENV/.env"
 REGION="${AWS_REGION:-ap-northeast-2}"
