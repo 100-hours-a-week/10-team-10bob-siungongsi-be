@@ -1,13 +1,13 @@
-name: Deploy Backend to AWS EC2
+name: Deploy batch to AWS EC2
 
 on:
   push:
     branches:
-      - develop  # develop 브랜치 푸시 시 실행
+      - batch  # batch 브랜치 푸시 시 실행
 
 jobs:
-  build-and-push-backend:
-    name: Build and Push Backend Docker Image
+  build-and-push-batch:
+    name: Build and Push batch Docker Image
     runs-on: ubuntu-latest
 
     steps:
@@ -46,41 +46,41 @@ jobs:
       - name: Set Version Tag
         run: echo "VERSION_TAG=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
 
-      - name: Build Backend Docker Image
+      - name: Build batch Docker Image
         run: |
-            docker build -t ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-backend .
-            docker tag ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-backend \
-            ${{ secrets.ECR_REGISTRY }}/siungongsi:${{ env.VERSION_TAG }}-backend
+            docker build -t ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-batch .
+            docker tag ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-batch \
+            ${{ secrets.ECR_REGISTRY }}/siungongsi:${{ env.VERSION_TAG }}-batch
 
-      - name: Push Backend Docker Image
+      - name: Push batch Docker Image
         run: |
-            docker push ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-backend
-            docker push ${{ secrets.ECR_REGISTRY }}/siungongsi:${{ env.VERSION_TAG }}-backend
+            docker push ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-batch
+            docker push ${{ secrets.ECR_REGISTRY }}/siungongsi:${{ env.VERSION_TAG }}-batch
 
   deploy:
     name: Deploy to EC2
-    needs: [build-and-push-backend]
+    needs: [build-and-push-batch]
     runs-on: ubuntu-latest
 
     steps:
       - name: SSH into EC2 and Deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
-            host: ${{ secrets.EC2_HOST }}
+            host: ${{ secrets.BATCH_EC2_HOST }}
             username: ubuntu
             key: ${{ secrets.EC2_SSH_KEY }}
             script: |
                 echo "Pulling latest images..."
                 aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
 
-                docker pull ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-backend
+                docker pull ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-batch
 
                 echo "Stopping and removing old containers..."
-                docker stop siungongsi-backend || true
-                docker rm siungongsi-backend || true
+                docker stop siungongsi-batch || true
+                docker rm siungongsi-batch || true
 
-                echo "Running new backend container..."
-                docker run -d --name siungongsi-backend -p 8080:8080 \
+                echo "Running new batch container..."
+                docker run -d --name siungongsi-batch -p 8080:8080 \
                     --restart always \
                     -e TZ=Asia/Seoul \
                     -e DB_HOST=${{ secrets.DB_HOST }} \
@@ -108,4 +108,4 @@ jobs:
                     -e JWT_EXPIRATION_TIME=${{ secrets.JWT_EXPIRATION_TIME }} \
                     -e FCM_KEY=${{ secrets.FCM_KEY }} \
                     -e SITE_URL=${{ secrets.SITE_URL }} \
-                    ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-backend
+                    ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-batch
