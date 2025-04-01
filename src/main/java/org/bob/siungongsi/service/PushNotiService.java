@@ -1,7 +1,5 @@
 package org.bob.siungongsi.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 import org.bob.siungongsi.domain.CompanyEntity;
@@ -41,24 +39,10 @@ public class PushNotiService {
   public boolean sendPushNotification(GongsiEntity gongsi) {
     List<NotiHistoryEntity> notiHistoryEntities =
         notificationRepository.findByCompanyId(gongsi.getCompany().getId());
-
-    System.out.println(
-        "Time : "
-            + LocalDateTime.now(ZoneId.of("Asia/Seoul"))
-            + " - Sending push notification for "
-            + notiHistoryEntities.size()
-            + " subscribers");
     List<UserEntity> subscribers =
         userRepository.findAllById(
             notiHistoryEntities.stream().map(NotiHistoryEntity::getUserId).toList());
     for (UserEntity user : subscribers) {
-      System.out.println(
-          "Sending push notification to "
-              + user.getId()
-              + " "
-              + user.getNotiFlag()
-              + " - "
-              + user.getPushTokenId());
       if (user.getPushTokenId() == null || user.getPushTokenId().isBlank()) {
         continue;
       }
@@ -75,15 +59,6 @@ public class PushNotiService {
             .findById(gongsi.getCompany().getId())
             .orElseThrow(() -> new RuntimeException("Company not found"));
 
-    System.out.println(
-        "Time : "
-            + LocalDateTime.now(ZoneId.of("Asia/Seoul"))
-            + " - Sending push notification to "
-            + token
-            + " company: "
-            + company.getCompanyName()
-            + " gongsi: "
-            + gongsi.getGongsiTitle());
     String title = company.getCompanyName() + " 기업의 새로운 공시가 나왔습니다.";
     String body = "공시 제목 : " + gongsi.getGongsiTitle();
     String url = siteUrl + "detail/" + gongsi.getId();
