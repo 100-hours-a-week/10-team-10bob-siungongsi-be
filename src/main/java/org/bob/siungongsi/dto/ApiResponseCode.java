@@ -9,6 +9,9 @@ public enum ApiResponseCode {
   GONGSI_INVALID_DATE_PAIR(1402, "invalid_date_pair"),
   GONGSI_NOT_FOUND(1403, "gongsi_not_found"),
   GONGSI_COMPANY_NOT_FOUND(1404, "company_not_found"),
+  GONGSI_INVALID_PAGE_SIZE(1405, "invalid_page_size"),
+  GONGSI_INVALID_PAGE_NUMBER(1406, "invalid_page_number"),
+  GONGSI_BAD_REQUEST(1499, "invalid_request_parameters"),
   GONGSI_INTERNAL_SERVER_ERROR(1500, "internal_server_error"),
 
   // 인증 관련 응답 코드 (2)
@@ -33,6 +36,7 @@ public enum ApiResponseCode {
   USER_SUBSCRIPTIONS_SUCCESS(3205, "get_user_subscriptions"),
   USER_REQUIRED_AUTHORIZATION(3400, "required_authorization"),
   USER_STATUS_ALREADY_EXIST(3401, "notification_status_already_exist"),
+  USER_INVALID_DATA_FORMAT(3402, "invalid_data_format"),
   USER_INTERNAL_SERVER_ERROR(3500, "internal_server_error"),
 
   // 회사 관련 응답 코드 (4)
