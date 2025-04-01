@@ -12,8 +12,13 @@ jobs:
 
     env:
       ECR_IMAGE: ${{ secrets.ECR_REGISTRY }}/siungongsi
+<<<<<<< HEAD:.github/workflows/prod-deploy.yml
       EB_APP_NAME: prod-siungongsi
       EB_ENV_NAME: Prod-siungongsi-env
+=======
+      EB_APP_NAME: dev-siungongsi
+      EB_ENV_NAME: Dev-siungongsi-env
+>>>>>>> 40fb7a556c4f0b3f0e024bbdb4f08441393df928:.github/workflows/dev-deploy-eb.yml
       S3_BUCKET: ${{ secrets.EB_S3_BUCKET }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
 
