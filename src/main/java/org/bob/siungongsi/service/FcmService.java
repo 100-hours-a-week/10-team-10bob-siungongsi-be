@@ -2,6 +2,8 @@ package org.bob.siungongsi.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,7 +70,14 @@ public class FcmService {
     Message message = Message.builder().setToken(token).putAllData(data).build();
 
     try {
-      firebaseMessaging.send(message);
+      String rst = firebaseMessaging.send(message);
+      System.out.println(
+          "Time : "
+              + LocalDateTime.now(ZoneId.of("Asia/Seoul"))
+              + " - Push notification sent to "
+              + token
+              + " with result: "
+              + rst);
     } catch (Exception e) {
       Sentry.captureException(e);
     }

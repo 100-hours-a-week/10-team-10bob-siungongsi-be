@@ -1,5 +1,7 @@
 package org.bob.siungongsi.scheduler;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.bob.siungongsi.domain.GongsiSentStatusEntity;
@@ -32,7 +34,12 @@ public class PushNotiWorker {
     Pageable pageable = PageRequest.of(0, 50);
     List<GongsiSentStatusEntity> pendingNotices =
         gongsiSentStatusRepository.findByStatus(PushStatus.PENDING, pageable);
-
+    System.out.println(
+        "Time : "
+            + LocalDateTime.now(ZoneId.of("Asia/Seoul"))
+            + " - Processing "
+            + pendingNotices.size()
+            + " pending push notifications");
     for (GongsiSentStatusEntity sentStatus : pendingNotices) {
       boolean success = pushNotiService.sendPushNotification(sentStatus.getGongsi());
 
