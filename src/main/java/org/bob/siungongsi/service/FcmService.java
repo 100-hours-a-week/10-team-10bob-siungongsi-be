@@ -2,8 +2,6 @@ package org.bob.siungongsi.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +17,6 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 
 import io.sentry.Sentry;
 import jakarta.annotation.PostConstruct;
@@ -68,17 +65,10 @@ public class FcmService {
     data.put("body", body);
     data.put("url", url);
 
-    Message message =
-        Message.builder()
-            .setToken(token)
-            .setNotification(Notification.builder().setTitle(title).setBody(body).build())
-            .putAllData(data)
-            .build();
+    Message message = Message.builder().setToken(token).putAllData(data).build();
 
     try {
-      String rst = firebaseMessaging.send(message);
-      System.out.println("Timestamp: " + LocalDateTime.now(ZoneId.of("Asia/Seoul")) + " " + rst);
-      System.out.println(token + " " + title + " " + body + " " + url);
+      firebaseMessaging.send(message);
     } catch (Exception e) {
       Sentry.captureException(e);
     }
