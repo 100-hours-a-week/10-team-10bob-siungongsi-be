@@ -24,7 +24,7 @@ public enum ApiResponseCode {
   AUTH_LOGIN_SUCCESS(HttpStatus.OK, 2202, "login_success"),
   AUTH_REGISTER_SUCCESS(HttpStatus.CREATED, 2203, "register_success"),
   AUTH_REQUIRED_AUTHORIZATION(HttpStatus.FORBIDDEN, 2400, "required_authorization"),
-  AUTH_ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2401, "access_token_expired"),
+  AUTH_KAKAO_ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2401, "kakao_access_token_expired"),
   AUTH_USER_NOT_FOUND(HttpStatus.NOT_FOUND, 2402, "user_not_found"),
   AUTH_TERMS_NOT_FOUND(HttpStatus.NOT_FOUND, 2403, "terms_not_found"),
   AUTH_USER_ALREADY_EXISTS(HttpStatus.CONFLICT, 2404, "user_already_exists"),
@@ -32,6 +32,12 @@ public enum ApiResponseCode {
   AUTH_USER_AGREED_TERMS_ID_ALREADY_EXISTS(
       HttpStatus.CONFLICT, 2406, "user_agreed_terms_id_already_exists"),
   AUTH_REQUIRED_TERMS_NOT_AGREED(HttpStatus.FORBIDDEN, 2407, "required_terms_not_agreed"),
+  AUTH_ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2408, "access_token_expired"),
+  AUTH_ACCESS_TOKEN_MISSING(HttpStatus.BAD_REQUEST, 2409, "access_token_missing"),
+  AUTH_ACCESS_TOKEN_MALFORMED(HttpStatus.BAD_REQUEST, 2410, "access_token_malformed"),
+  AUTH_ACCESS_TOKEN_UNSUPPORTED(HttpStatus.BAD_REQUEST, 2411, "access_token_unsupported"),
+  AUTH_ACCESS_TOKEN_INVALID_SIGNATURE(
+      HttpStatus.UNAUTHORIZED, 2412, "access_token_invalid_signature"),
   AUTH_INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 2500, "internal_server_error"),
 
   // 유저 관련 응답 코드 (3)
@@ -50,7 +56,7 @@ public enum ApiResponseCode {
   COMPANY_INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 4500, "internal_server_error"),
 
   // 알림 관련 응답 코드 (5)
-  NOTIFICATION_RECOMMENDED_COMPANY_SUCCESS(HttpStatus.OK, 5200, "get_recomended_company_success"),
+  NOTIFICATION_RECOMMENDED_COMPANY_SUCCESS(HttpStatus.OK, 5200, "get_recommended_company_success"),
   NOTIFICATION_SUBSCRIPTION_SUCCESS(HttpStatus.CREATED, 5201, "notification_subscription_success"),
   NOTIFICATION_UNSUBSCRIBE_SUCCESS(HttpStatus.OK, 5202, "unsubscribe_notification_success"),
   NOTIFICATION_REQUIRED_AUTHORIZATION(HttpStatus.FORBIDDEN, 5400, "required_authorization"),
@@ -60,11 +66,16 @@ public enum ApiResponseCode {
   NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, 5404, "notification_not_found"),
   NOTIFICATION_LIMIT_EXCEEDED(
       HttpStatus.TOO_MANY_REQUESTS, 5405, "maximum_number_of_notifications_exceeded."),
-  NOTIFICATION_INTERNAL_SERVER_ERROR(
-      HttpStatus.INTERNAL_SERVER_ERROR, 5500, "internal_server_error"),
+  NOTIFICATION_COMPANY_ID_IS_NULL(HttpStatus.BAD_REQUEST, 5406, "company_id_not_null"),
+  NOTIFICATION_USER_NOT_FOUND(HttpStatus.NOT_FOUND, 5407, "user_not_found"),
+  NOTIFICATION_CREATION_INCONSISTENCY(
+      HttpStatus.INTERNAL_SERVER_ERROR, 5408, "notification_creation_inconsistency"),
 
   // 외부 API 관련 응답 코드 (6)
   EXTERNAL_API_ERROR(HttpStatus.BAD_GATEWAY, 6400, "external_api_error"),
+
+  // BODY값 없을 때
+  API_BAD_REQUEST(HttpStatus.BAD_REQUEST, 700, "api_bad_request"),
 
   // API KEY STORE 관련 응답코드 (27)
   KEY_NOT_FOUND(HttpStatus.NOT_FOUND, 2700, "key_not_found"),
