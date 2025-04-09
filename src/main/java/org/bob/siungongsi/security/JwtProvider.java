@@ -22,31 +22,53 @@ import io.jsonwebtoken.security.SignatureException;
 public class JwtProvider {
 
   private final String secretKey;
+  private final String secretRefreshKey;
   private final long expirationTime;
+  private final long refreshExpirationTime;
 
   @Autowired
   public JwtProvider(
       @Value("${jwt.secret-key}") String secretKey,
-      @Value("${jwt.expiration-time}") long expirationTime) {
+      @Value("${jwt.secret-refresh-key}") String secretRefreshKey,
+      @Value("${jwt.expiration-time}") long expirationTime,
+      @Value("${jwt.refresh-expiration-time}") long refreshExpirationTime) {
     this.secretKey = secretKey;
+    this.secretRefreshKey = secretRefreshKey;
     this.expirationTime = expirationTime;
+    this.refreshExpirationTime = refreshExpirationTime;
   }
 
-  public JwtProvider(String secretKey, long expirationTime, boolean isTest) {
+  public JwtProvider(
+      String secretKey, long expirationTime, String secretRefreshKey, long refreshExpirationTime) {
     this.secretKey = secretKey;
     this.expirationTime = expirationTime;
+    this.secretRefreshKey = secretRefreshKey;
+    this.refreshExpirationTime = refreshExpirationTime;
   }
 
   private SecretKey getKey() {
     return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
   }
 
-  public String createJwtToken(String userId) {
+  private SecretKey getRefreshKey() {
+    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretRefreshKey));
+  }
+
+  public String createJwtAccessToken(String userId) {
     return Jwts.builder()
         .subject(userId)
         .issuedAt(new Date())
         .expiration(new Date(System.currentTimeMillis() + expirationTime))
         .signWith(getKey())
+        .compact();
+  }
+
+  public String createJwtRefreshToken(String userId) {
+    return Jwts.builder()
+        .subject(userId)
+        .issuedAt(new Date())
+        .expiration(new Date(System.currentTimeMillis() + refreshExpirationTime))
+        .signWith(getRefreshKey())
         .compact();
   }
 

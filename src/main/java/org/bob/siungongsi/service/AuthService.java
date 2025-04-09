@@ -100,23 +100,23 @@ public class AuthService {
     }
   }
 
-  public AuthResponse.LoginSuccessResponse login(String accessToken) {
-    String socialId = kakaoAuthService.getSocialIdFromAccessToken(accessToken);
-
+  public AuthResponse.LoginSuccessResponse login(String kakaoToken) {
+    String socialId = kakaoAuthService.getSocialIdFromAccessToken(kakaoToken);
     UserEntity user = userRepository.findBySocialId(socialId).orElse(null);
 
     if (user == null) {
-      return AuthResponse.LoginSuccessResponse.of(null, false);
+      return AuthResponse.LoginSuccessResponse.of(null, null, false);
     }
 
-    user.updateAccessToken(accessToken.substring(7));
+    user.updateAccessToken(kakaoToken.substring(7));
     userRepository.save(user);
-    String jwt = jwtProvider.createJwtToken(user.getId().toString());
-    return AuthResponse.LoginSuccessResponse.of(jwt, true);
+    String accessToken = jwtProvider.createJwtAccessToken(user.getId().toString());
+    String refreshToken = jwtProvider.createJwtRefreshToken(user.getId().toString());
+    return AuthResponse.LoginSuccessResponse.of(accessToken, refreshToken, true);
   }
 
   public String createJwt(String userId) {
-    return jwtProvider.createJwtToken(userId);
+    return jwtProvider.createJwtAccessToken(userId);
   }
 
   @Transactional

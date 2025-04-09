@@ -89,7 +89,7 @@ public class AdminController implements AdminControllerSpec {
   @Override
   public ResponseEntity<ApiResponseWrapper<?>> getToken(@RequestParam("userId") String userId) {
     ApiResponseWrapper<?> response =
-        new ApiResponseWrapper<>(12341243, "토큰 획득", jwtProvider.createJwtToken(userId));
+        new ApiResponseWrapper<>(12341243, "토큰 획득", jwtProvider.createJwtAccessToken(userId));
     return ResponseEntity.ok(response);
   }
 }
