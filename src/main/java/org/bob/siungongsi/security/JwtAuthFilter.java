@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     authHeader = authHeader.replace("Bearer ", "");
-    Long userId = jwtProvider.validateJwtToken(authHeader);
+    Long userId = jwtProvider.validateJwtToken(authHeader, true);
 
     JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(userId);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);

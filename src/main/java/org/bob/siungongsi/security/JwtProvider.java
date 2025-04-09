@@ -72,11 +72,11 @@ public class JwtProvider {
         .compact();
   }
 
-  public Long validateJwtToken(String token) {
+  public Long validateJwtToken(String token, boolean isAccessToken) {
     try {
       return Long.parseLong(
           Jwts.parser()
-              .verifyWith(getKey())
+              .verifyWith(isAccessToken ? getKey() : getRefreshKey())
               .build()
               .parseSignedClaims(token)
               .getPayload()

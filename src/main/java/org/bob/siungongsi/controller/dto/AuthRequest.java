@@ -4,4 +4,6 @@ import java.util.List;
 
 public class AuthRequest {
   public record RegisterRequest(List<Long> agreedTermIds) {}
+
+  public record RefreshRequest(String refreshToken) {}
 }

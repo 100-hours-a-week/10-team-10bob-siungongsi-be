@@ -123,13 +123,21 @@ public class AuthService {
   }
 
   public AuthResponse.RegisterSuccessResponse refreshToken(String refreshToken) {
+    Long userId = jwtProvider.validateJwtToken(refreshToken, false);
+
     UserEntity user =
         userRepository
-            .findByAccessToken(refreshToken)
+            .findById(userId)
             .orElseThrow(() -> new CustomException(ApiResponseCode.AUTH_REFRESH_TOKEN_INVALID));
+
+    if (!user.getAccessToken().equals(refreshToken)) {
+      throw new CustomException(ApiResponseCode.AUTH_REFRESH_TOKEN_INVALID);
+    }
 
     String accessToken = jwtProvider.createJwtAccessToken(user.getId().toString());
     String refreshToken2 = jwtProvider.createJwtRefreshToken(user.getId().toString());
+    user.updateAccessToken(refreshToken2);
+    userRepository.save(user);
     return AuthResponse.RegisterSuccessResponse.of(accessToken, refreshToken2);
   }
 

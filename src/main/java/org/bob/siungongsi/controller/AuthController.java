@@ -62,9 +62,10 @@ public class AuthController implements AuthControllerSpec {
   @Override
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponseWrapper<AuthResponse.RegisterSuccessResponse>> refreshToken(
-      @RequestBody String refreshToken) {
+      @RequestBody AuthRequest.RefreshRequest refreshToken) {
 
-    AuthResponse.RegisterSuccessResponse response = authService.refreshToken(refreshToken);
+    AuthResponse.RegisterSuccessResponse response =
+        authService.refreshToken(refreshToken.refreshToken());
 
     return ResponseEntity.status(ApiResponseCode.AUTH_REFRESH_TOKEN_SUCCESS.getHttpStatus())
         .body(ApiResponseWrapper.success(ApiResponseCode.AUTH_REFRESH_TOKEN_SUCCESS, response));

@@ -228,7 +228,7 @@ public interface AuthControllerSpec {
             })
       })
   ResponseEntity<ApiResponseWrapper<AuthResponse.RegisterSuccessResponse>> refreshToken(
-      String refreshToken);
+      AuthRequest.RefreshRequest refreshToken);
 
   /** 회원 탈퇴 API */
   @DeleteMapping("/withdraw")
