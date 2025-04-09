@@ -6,7 +6,6 @@ import org.bob.siungongsi.controller.dto.AuthResponse.LoginSuccessResponse;
 import org.bob.siungongsi.dto.ApiResponseWrapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -229,19 +228,7 @@ public interface AuthControllerSpec {
             })
       })
   ResponseEntity<ApiResponseWrapper<AuthResponse.RegisterSuccessResponse>> refreshToken(
-      @Parameter(
-              description = "JWT 토큰 (Bearer 포함)",
-              required = true,
-              example = "Bearer your_token_here")
-          @RequestHeader("Authorization")
-          String authorization,
-      @Parameter(
-              name = "X-Refresh-Token",
-              description = "Refresh Token (Bearer 포함 또는 원문)",
-              required = true,
-              example = "Bearer your_refresh_token")
-          @RequestHeader("X-Refresh-Token")
-          String refreshToken);
+      String refreshToken);
 
   /** 회원 탈퇴 API */
   @DeleteMapping("/withdraw")
