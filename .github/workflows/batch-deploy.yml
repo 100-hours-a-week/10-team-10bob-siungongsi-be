@@ -19,7 +19,7 @@ jobs:
         with:
             distribution: 'temurin'
             java-version: '21'
-      
+
       - name: Fix Code Formatting
         run: ./gradlew spotlessApply
 
@@ -28,7 +28,7 @@ jobs:
 
       - name: Build Spring Boot JAR
         env:
-            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }} 
+            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           chmod +x gradlew
           ./gradlew clean build -x test
@@ -79,11 +79,11 @@ jobs:
                 docker pull ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-batch
 
                 echo "Stopping and removing old containers..."
-                docker stop siungongsi-batch || true
-                docker rm siungongsi-batch || true
+                docker stop siungongsi-backend || true
+                docker rm siungongsi-backend || true
 
-                echo "Running new batch container..."
-                docker run -d --name siungongsi-batch -p 8080:8080 \
+                echo "Running new backend container..."
+                docker run -d --name siungongsi-backend -p 8080:8080 \
                     --restart always \
                     -e TZ=Asia/Seoul \
                     -e DB_HOST=${{ secrets.DB_HOST }} \
@@ -111,4 +111,4 @@ jobs:
                     -e JWT_EXPIRATION_TIME=${{ secrets.JWT_EXPIRATION_TIME }} \
                     -e FCM_KEY=${{ secrets.FCM_KEY }} \
                     -e SITE_URL=${{ secrets.SITE_URL }} \
-                    ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-batch
+                    ${{ secrets.ECR_REGISTRY }}/siungongsi:latest-backend
