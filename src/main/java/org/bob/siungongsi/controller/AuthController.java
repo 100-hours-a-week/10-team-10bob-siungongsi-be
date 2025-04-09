@@ -3,6 +3,7 @@ package org.bob.siungongsi.controller;
 import java.util.List;
 
 import org.bob.siungongsi.controller.dto.AuthRequest;
+import org.bob.siungongsi.controller.dto.AuthResponse;
 import org.bob.siungongsi.controller.dto.AuthResponse.LoginSuccessResponse;
 import org.bob.siungongsi.controller.dto.TermsResponse;
 import org.bob.siungongsi.controller.spec.AuthControllerSpec;
@@ -33,10 +34,10 @@ public class AuthController implements AuthControllerSpec {
       @RequestBody AuthRequest.RegisterRequest authRequest,
       @RequestHeader("Authorization") String accessToken) {
 
-    String jwt = authService.register(authRequest, accessToken);
+    AuthResponse.RegisterSuccessResponse response = authService.register(authRequest, accessToken);
 
     return ResponseEntity.status(ApiResponseCode.AUTH_REGISTER_SUCCESS.getHttpStatus())
-        .body(ApiResponseWrapper.success(ApiResponseCode.AUTH_REGISTER_SUCCESS, jwt));
+        .body(ApiResponseWrapper.success(ApiResponseCode.AUTH_REGISTER_SUCCESS, response));
   }
 
   @Override

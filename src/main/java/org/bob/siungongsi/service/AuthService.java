@@ -47,19 +47,20 @@ public class AuthService {
   }
 
   @Transactional
-  public String register(AuthRequest.RegisterRequest authRequest, String accessToken) {
+  public AuthResponse.RegisterSuccessResponse register(
+      AuthRequest.RegisterRequest authRequest, String kakaoToken) {
 
-    if (accessToken == null || accessToken.isEmpty()) {
+    if (kakaoToken == null || kakaoToken.isEmpty()) {
       throw new CustomException(ApiResponseCode.AUTH_REQUIRED_AUTHORIZATION);
     }
 
-    String socialId = kakaoAuthService.getSocialIdFromAccessToken(accessToken);
+    String socialId = kakaoAuthService.getSocialIdFromAccessToken(kakaoToken);
 
     if (userRepository.existsBySocialId(socialId)) {
       throw new CustomException(ApiResponseCode.AUTH_USER_ALREADY_EXISTS);
     }
 
-    Long userId = userRepository.save(new UserEntity(socialId, accessToken.substring(7))).getId();
+    Long userId = userRepository.save(new UserEntity(socialId, kakaoToken.substring(7))).getId();
 
     List<UserAgreedTermEntity> userAgreedTerms =
         validateAndCreateUserAgreedTerms(authRequest.agreedTermIds(), userId);
@@ -67,7 +68,10 @@ public class AuthService {
       userAgreedTermRepository.saveAll(userAgreedTerms);
     }
 
-    return createJwt(userId.toString());
+    String accessToken = jwtProvider.createJwtAccessToken(userId.toString());
+    String refreshToken = jwtProvider.createJwtRefreshToken(userId.toString());
+
+    return AuthResponse.RegisterSuccessResponse.of(accessToken, refreshToken);
   }
 
   private List<UserAgreedTermEntity> validateAndCreateUserAgreedTerms(
@@ -113,10 +117,6 @@ public class AuthService {
     String accessToken = jwtProvider.createJwtAccessToken(user.getId().toString());
     String refreshToken = jwtProvider.createJwtRefreshToken(user.getId().toString());
     return AuthResponse.LoginSuccessResponse.of(accessToken, refreshToken, true);
-  }
-
-  public String createJwt(String userId) {
-    return jwtProvider.createJwtAccessToken(userId);
   }
 
   @Transactional
