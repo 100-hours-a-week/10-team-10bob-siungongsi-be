@@ -119,6 +119,13 @@ public class AuthService {
     return AuthResponse.LoginSuccessResponse.of(accessToken, refreshToken, true);
   }
 
+  public AuthResponse.RegisterSuccessResponse refreshToken(String refreshToken) {
+    Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String accessToken = jwtProvider.createJwtAccessToken(userId.toString());
+    String refreshToken2 = jwtProvider.createJwtRefreshToken(userId.toString());
+    return AuthResponse.RegisterSuccessResponse.of(accessToken, refreshToken2);
+  }
+
   @Transactional
   public void withdrawUser() {
 

@@ -60,6 +60,18 @@ public class AuthController implements AuthControllerSpec {
   }
 
   @Override
+  @PostMapping("/refresh")
+  public ResponseEntity<ApiResponseWrapper<AuthResponse.RegisterSuccessResponse>> refreshToken(
+      @RequestHeader("Authorization") String accessToken,
+      @RequestHeader("X-Refresh-Token") String refreshToken) {
+
+    AuthResponse.RegisterSuccessResponse response = authService.refreshToken(refreshToken);
+
+    return ResponseEntity.status(ApiResponseCode.AUTH_REFRESH_TOKEN_SUCCESS.getHttpStatus())
+        .body(ApiResponseWrapper.success(ApiResponseCode.AUTH_REFRESH_TOKEN_SUCCESS, response));
+  }
+
+  @Override
   @DeleteMapping("/withdraw")
   public ResponseEntity<ApiResponseWrapper<?>> withdrawUser(
       @RequestHeader("Authorization") String accessToken) {
