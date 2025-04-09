@@ -10,8 +10,8 @@ import org.springframework.data.repository.query.Param;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
   Optional<UserEntity> findBySocialId(String socialId);
 
-  Boolean existsBySocialId(String socialId);
+  boolean existsBySocialId(String socialId);
 
   @Query("SELECT n.notiFlag FROM UserEntity n WHERE n.id = :id")
-  Short findNotiFlagById(@Param("id") Long id);
+  boolean findNotiFlagById(@Param("id") Long id);
 }

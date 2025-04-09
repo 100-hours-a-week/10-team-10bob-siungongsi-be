@@ -50,25 +50,24 @@ public class AuthService {
   public String register(AuthRequest.RegisterRequest authRequest, String accessToken) {
 
     if (accessToken == null || accessToken.isEmpty()) {
-      throw new CustomException(ApiResponseCode.AUTH_REQUIRED_AUTHORIZATION, "토큰이 필요합니다.");
+      throw new CustomException(ApiResponseCode.AUTH_REQUIRED_AUTHORIZATION);
     }
 
     String socialId = kakaoAuthService.getSocialIdFromAccessToken(accessToken);
 
     if (userRepository.existsBySocialId(socialId)) {
-      throw new CustomException(ApiResponseCode.AUTH_USER_ALREADY_EXISTS, "이미 가입된 사용자입니다.");
+      throw new CustomException(ApiResponseCode.AUTH_USER_ALREADY_EXISTS);
     }
 
-    UserEntity newUserEntity =
-        userRepository.save(new UserEntity(socialId, accessToken.substring(7)));
+    Long userId = userRepository.save(new UserEntity(socialId, accessToken.substring(7))).getId();
 
     List<UserAgreedTermEntity> userAgreedTerms =
-        validateAndCreateUserAgreedTerms(authRequest.agreedTermIds(), newUserEntity.getId());
+        validateAndCreateUserAgreedTerms(authRequest.agreedTermIds(), userId);
     if (!userAgreedTerms.isEmpty()) {
       userAgreedTermRepository.saveAll(userAgreedTerms);
     }
 
-    return createJwt(newUserEntity.getId().toString());
+    return createJwt(userId.toString());
   }
 
   private List<UserAgreedTermEntity> validateAndCreateUserAgreedTerms(
@@ -85,19 +84,18 @@ public class AuthService {
     List<Long> requiredTermIds = termRepository.findIdsByRequiredFlag();
 
     if (!agreedTermIds.containsAll(requiredTermIds)) {
-      throw new CustomException(ApiResponseCode.AUTH_REQUIRED_TERMS_NOT_AGREED, "필수 약관에 동의해야 합니다.");
+      throw new CustomException(ApiResponseCode.AUTH_REQUIRED_TERMS_NOT_AGREED);
     }
   }
 
   private void validateTermIds(List<Long> agreedTermIds, Long userId) {
     for (Long termId : agreedTermIds) {
       if (!termRepository.existsById(termId)) {
-        throw new CustomException(ApiResponseCode.AUTH_TERMS_ID_NOT_FOUND, "찾을 수 없는 term_id 입니다.");
+        throw new CustomException(ApiResponseCode.AUTH_TERMS_ID_NOT_FOUND);
       }
 
       if (userAgreedTermRepository.existsByUserIdAndTermId(userId, termId)) {
-        throw new CustomException(
-            ApiResponseCode.AUTH_USER_AGREED_TERMS_ID_ALREADY_EXISTS, "이미 존재하는 회원 동의 약관 id 입니다.");
+        throw new CustomException(ApiResponseCode.AUTH_USER_AGREED_TERMS_ID_ALREADY_EXISTS);
       }
     }
   }
@@ -126,15 +124,15 @@ public class AuthService {
 
     Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+    if (!userRepository.existsById(userId)) {
+      throw new CustomException(ApiResponseCode.AUTH_USER_NOT_FOUND);
+    }
+
     // 회원의 알림 구독 정보 삭제
     notificationRepository.deleteAllByUserId(userId);
 
     // 회원의 약관 동의 정보 삭제
     userAgreedTermRepository.deleteAllByUserId(userId);
-
-    if (!userRepository.existsById(userId)) {
-      throw new CustomException(ApiResponseCode.AUTH_USER_NOT_FOUND, "사용자가 존재하지 않습니다.");
-    }
 
     // 회원 정보 삭제
     userRepository.deleteById(userId);
@@ -145,8 +143,7 @@ public class AuthService {
     List<TermEntity> terms = termRepository.findAll();
 
     if (terms.isEmpty()) {
-      throw new CustomException(
-          ApiResponseCode.AUTH_TERMS_NOT_FOUND, ApiResponseCode.AUTH_TERMS_NOT_FOUND.getMessage());
+      throw new CustomException(ApiResponseCode.AUTH_TERMS_NOT_FOUND);
     }
 
     return terms.stream()

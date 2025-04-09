@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.bob.siungongsi.config.SqsProperties;
 import org.bob.siungongsi.event.GongsiMessage;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,19 +15,20 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
+@Profile("batch")
 @Service
 public class MessageSender {
 
   private final SqsAsyncClient sqsAsyncClient;
   private final String queueUrl;
-  private final int visibilityTimeout;
+  private final int delaySeconds;
   private final ObjectMapper objectMapper;
 
   public MessageSender(
       SqsAsyncClient sqsAsyncClient, SqsProperties sqsProperties, ObjectMapper objectMapper) {
     this.sqsAsyncClient = sqsAsyncClient;
     this.queueUrl = sqsProperties.url();
-    this.visibilityTimeout = sqsProperties.visibilityTimeout();
+    this.delaySeconds = sqsProperties.delaySeconds();
     this.objectMapper = objectMapper;
   }
 
@@ -38,7 +40,7 @@ public class MessageSender {
           SendMessageRequest.builder()
               .queueUrl(queueUrl)
               .messageBody(messageBody)
-              .delaySeconds(visibilityTimeout)
+              .delaySeconds(delaySeconds)
               .build();
 
       return sqsAsyncClient

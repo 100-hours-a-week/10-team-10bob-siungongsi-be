@@ -1,7 +1,9 @@
 package org.bob.siungongsi.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Profile;
 
+@Profile("batch")
 @ConfigurationProperties(prefix = "spring.cloud.aws.sqs.queue")
 public record SqsProperties(
     String name,
@@ -9,4 +11,4 @@ public record SqsProperties(
     String region,
     int maxNumberOfMessages,
     int waitTimeSeconds,
-    int visibilityTimeout) {}
+    int delaySeconds) {}

@@ -1,6 +1,7 @@
 package org.bob.siungongsi.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.bob.siungongsi.controller.dto.NotificationRequest;
@@ -14,8 +15,7 @@ import org.bob.siungongsi.repository.NotificationRepository;
 import org.bob.siungongsi.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NotificationService {
@@ -33,47 +33,66 @@ public class NotificationService {
     this.userRepository = userRepository;
   }
 
+  @Transactional
   public NotiHistoryEntity createNotification(
       NotificationRequest.NotificationCompanyRequest notificationRequest) {
     Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    if (!userRepository.findById(userId).isPresent()) {
-      throw new CustomException(ApiResponseCode.AUTH_USER_NOT_FOUND, "존재하지 않은 유저입니다.");
+    if (!userRepository.existsById(userId)) {
+      throw new CustomException(ApiResponseCode.AUTH_USER_NOT_FOUND);
     }
 
-    if (notificationRepository.existsByUserIdAndCompanyId(
-        userId, notificationRequest.companyId())) {
-      throw new CustomException(ApiResponseCode.NOTIFICATION_ALREADY_EXISTS, "이미 존재하는 알림입니다.");
+    if (notificationRequest.companyId() == null) {
+      throw new CustomException(ApiResponseCode.NOTIFICATION_COMPANY_ID_IS_NULL);
     }
 
     if (!companyRepository.existsById(notificationRequest.companyId())) {
-      throw new CustomException(ApiResponseCode.NOTIFICATION_INVALID_COMPANY_ID, "존재하지 않는 기업입니다.");
+      throw new CustomException(ApiResponseCode.NOTIFICATION_INVALID_COMPANY_ID);
     }
 
-    if (userRepository.findNotiFlagById(userId) == 0) {
-      throw new CustomException(
-          ApiResponseCode.NOTIFICATION_REQUIRED_STATUS, "유저가 알림을 동의하지 않았습니다. ");
+    if (!userRepository.findNotiFlagById(userId)) {
+      throw new CustomException(ApiResponseCode.NOTIFICATION_REQUIRED_STATUS);
     }
 
-    return notificationRepository.save(
-        new NotiHistoryEntity(userId, notificationRequest.companyId()));
+    // 원자적 쿼리 실행 - 제한 체크와 삽입을 하나의 쿼리로 수행
+    int inserted =
+        notificationRepository.insertIfUnderLimit(userId, notificationRequest.companyId());
+
+    if (inserted == 0) {
+      // 삽입 실패: 제한 초과 또는 이미 존재함
+      if (notificationRepository.existsByUserIdAndCompanyId(
+          userId, notificationRequest.companyId())) {
+        throw new CustomException(ApiResponseCode.NOTIFICATION_ALREADY_EXISTS);
+      } else {
+        throw new CustomException(ApiResponseCode.NOTIFICATION_LIMIT_EXCEEDED);
+      }
+    }
+
+    Optional<NotiHistoryEntity> entity =
+        notificationRepository.findByUserIdAndCompanyId(userId, notificationRequest.companyId());
+
+    return entity.orElseThrow(
+        () -> new CustomException(ApiResponseCode.NOTIFICATION_CREATION_INCONSISTENCY));
   }
 
   @Transactional
   public void deleteNotification(Long companyId) {
     Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+    if (!userRepository.existsById(userId)) {
+      throw new CustomException(ApiResponseCode.AUTH_USER_NOT_FOUND);
+    }
+
     if (!notificationRepository.existsByUserIdAndCompanyId(userId, companyId)) {
-      throw new CustomException(ApiResponseCode.NOTIFICATION_NOT_FOUND, "존재하지 않는 알림 내역입니다.");
+      throw new CustomException(ApiResponseCode.NOTIFICATION_NOT_FOUND);
     }
 
     if (!companyRepository.existsById(companyId)) {
-      throw new CustomException(ApiResponseCode.NOTIFICATION_INVALID_COMPANY_ID, "존재하지 않는 기업입니다.");
+      throw new CustomException(ApiResponseCode.NOTIFICATION_INVALID_COMPANY_ID);
     }
 
-    if (userRepository.findNotiFlagById(userId) == 0) {
-      throw new CustomException(
-          ApiResponseCode.NOTIFICATION_REQUIRED_STATUS, "유저가 알림을 동의하지 않았습니다. ");
+    if (!userRepository.findNotiFlagById(userId)) {
+      throw new CustomException(ApiResponseCode.NOTIFICATION_REQUIRED_STATUS);
     }
 
     notificationRepository.deleteByUserIdAndCompanyId(userId, companyId);
@@ -95,6 +114,10 @@ public class NotificationService {
     List<CompanyEntity> companies = companyRepository.findByIdIn(topCompanies);
 
     Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    if (!userRepository.existsById(userId)) {
+      throw new CustomException(ApiResponseCode.AUTH_USER_NOT_FOUND);
+    }
 
     NotificationResponse.NotificationRecommendedCompanyList recommendedCompanies =
         NotificationResponse.NotificationRecommendedCompanyList.of(
