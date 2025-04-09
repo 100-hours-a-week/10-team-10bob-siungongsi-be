@@ -54,6 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   private boolean isPublicUri(String uri) {
     return uri.equals("/v1/auth/login")
         || uri.equals("/v1/auth/register")
+        || uri.equals("/v1/auth/refresh")
         || uri.equals("/v1/auth/terms")
         || uri.equals("/v1/gongsi")
         || uri.equals("/health")

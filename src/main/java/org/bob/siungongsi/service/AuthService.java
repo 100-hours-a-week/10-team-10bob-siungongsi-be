@@ -60,7 +60,8 @@ public class AuthService {
       throw new CustomException(ApiResponseCode.AUTH_USER_ALREADY_EXISTS);
     }
 
-    Long userId = userRepository.save(new UserEntity(socialId, kakaoToken.substring(7))).getId();
+    UserEntity user = userRepository.save(new UserEntity(socialId, ""));
+    Long userId = user.getId();
 
     List<UserAgreedTermEntity> userAgreedTerms =
         validateAndCreateUserAgreedTerms(authRequest.agreedTermIds(), userId);
@@ -70,6 +71,8 @@ public class AuthService {
 
     String accessToken = jwtProvider.createJwtAccessToken(userId.toString());
     String refreshToken = jwtProvider.createJwtRefreshToken(userId.toString());
+
+    user.updateAccessToken(refreshToken);
 
     return AuthResponse.RegisterSuccessResponse.of(accessToken, refreshToken);
   }
@@ -112,17 +115,21 @@ public class AuthService {
       return AuthResponse.LoginSuccessResponse.of(null, null, false);
     }
 
-    user.updateAccessToken(kakaoToken.substring(7));
-    userRepository.save(user);
     String accessToken = jwtProvider.createJwtAccessToken(user.getId().toString());
     String refreshToken = jwtProvider.createJwtRefreshToken(user.getId().toString());
+    user.updateAccessToken(refreshToken);
+    userRepository.save(user);
     return AuthResponse.LoginSuccessResponse.of(accessToken, refreshToken, true);
   }
 
   public AuthResponse.RegisterSuccessResponse refreshToken(String refreshToken) {
-    Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String accessToken = jwtProvider.createJwtAccessToken(userId.toString());
-    String refreshToken2 = jwtProvider.createJwtRefreshToken(userId.toString());
+    UserEntity user =
+        userRepository
+            .findByAccessToken(refreshToken)
+            .orElseThrow(() -> new CustomException(ApiResponseCode.AUTH_REFRESH_TOKEN_INVALID));
+
+    String accessToken = jwtProvider.createJwtAccessToken(user.getId().toString());
+    String refreshToken2 = jwtProvider.createJwtRefreshToken(user.getId().toString());
     return AuthResponse.RegisterSuccessResponse.of(accessToken, refreshToken2);
   }
 
