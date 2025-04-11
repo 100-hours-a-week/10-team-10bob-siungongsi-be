@@ -49,3 +49,6 @@ jwt:
   expiration-time: 604800000
   refresh-expiration-time: 2419200000
 
+logging:
+  level:
+    root: INFO
