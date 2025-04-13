@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bob.siungongsi.api.service.ApiKeyStoreManager;
+import org.bob.siungongsi.api.service.StockCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ public class KoreanInvestmentClient {
   private final ObjectMapper objectMapper;
   private final RestTemplate restTemplate;
   private final ApiKeyStoreManager tokenManager;
+  private final StockCacheService stockCacheService;
 
   @Value("${korean.investment.appkey}")
   private String appKey;
@@ -43,9 +45,13 @@ public class KoreanInvestmentClient {
   @Value("${korean.investment.token.url}")
   private String tokenUrl;
 
-  public KoreanInvestmentClient(ObjectMapper objectMapper, ApiKeyStoreManager tokenManager) {
+  public KoreanInvestmentClient(
+      ObjectMapper objectMapper,
+      ApiKeyStoreManager tokenManager,
+      StockCacheService stockCacheService) {
     this.objectMapper = objectMapper;
     this.tokenManager = tokenManager;
+    this.stockCacheService = stockCacheService;
     this.restTemplate = new RestTemplate();
   }
 
@@ -62,6 +68,14 @@ public class KoreanInvestmentClient {
 
   public double fallbackGetPrdyCtr(String stockCode, Throwable t) {
     logger.warn("Fallback method called for getPrdyCtr: {}", t.getMessage());
+    if (stockCacheService.hasCachedStock(stockCode)) {
+      Object cachedValue = stockCacheService.getCachedStockPrice(stockCode);
+      if (cachedValue instanceof Double) {
+        return (Double) cachedValue;
+      } else {
+        return -101;
+      }
+    }
     return -101;
   }
 
@@ -89,8 +103,9 @@ public class KoreanInvestmentClient {
       JsonNode root = objectMapper.readTree(responseBody);
       JsonNode outputData = root.path("output");
       String prdyCtrt = outputData.path("prdy_ctrt").asText();
-
-      return Double.parseDouble(prdyCtrt.replaceAll("[^0-9.-]", ""));
+      Double prdyCtr = Double.parseDouble(prdyCtrt.replaceAll("[^0-9.-]", ""));
+      stockCacheService.cacheStockPrice(stockCode, prdyCtr);
+      return prdyCtr;
 
     } catch (RestClientException e) {
       logger.error("Error fetching stock data from Korean Investment API: {}", e.getMessage());
