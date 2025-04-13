@@ -3,6 +3,7 @@ package org.bob.siungongsi.api.controller;
 import java.util.List;
 
 import org.bob.siungongsi.api.controller.dto.AuthRequest;
+import org.bob.siungongsi.api.controller.dto.AuthResponse;
 import org.bob.siungongsi.api.controller.dto.AuthResponse.LoginSuccessResponse;
 import org.bob.siungongsi.api.controller.dto.TermsResponse;
 import org.bob.siungongsi.api.controller.spec.AuthControllerSpec;
@@ -33,10 +34,10 @@ public class AuthController implements AuthControllerSpec {
       @RequestBody AuthRequest.RegisterRequest authRequest,
       @RequestHeader("Authorization") String accessToken) {
 
-    String jwt = authService.register(authRequest, accessToken);
+    AuthResponse.RegisterSuccessResponse response = authService.register(authRequest, accessToken);
 
     return ResponseEntity.status(ApiResponseCode.AUTH_REGISTER_SUCCESS.getHttpStatus())
-        .body(ApiResponseWrapper.success(ApiResponseCode.AUTH_REGISTER_SUCCESS, jwt));
+        .body(ApiResponseWrapper.success(ApiResponseCode.AUTH_REGISTER_SUCCESS, response));
   }
 
   @Override
@@ -56,6 +57,18 @@ public class AuthController implements AuthControllerSpec {
     List<TermsResponse> terms = authService.getTerms();
     return ResponseEntity.status(ApiResponseCode.AUTH_GET_TERMS_SUCCESS.getHttpStatus())
         .body(ApiResponseWrapper.success(ApiResponseCode.AUTH_GET_TERMS_SUCCESS, terms));
+  }
+
+  @Override
+  @PostMapping("/refresh")
+  public ResponseEntity<ApiResponseWrapper<AuthResponse.RegisterSuccessResponse>> refreshToken(
+      @RequestBody AuthRequest.RefreshRequest refreshToken) {
+
+    AuthResponse.RegisterSuccessResponse response =
+        authService.refreshToken(refreshToken.refreshToken());
+
+    return ResponseEntity.status(ApiResponseCode.AUTH_REFRESH_TOKEN_SUCCESS.getHttpStatus())
+        .body(ApiResponseWrapper.success(ApiResponseCode.AUTH_REFRESH_TOKEN_SUCCESS, response));
   }
 
   @Override

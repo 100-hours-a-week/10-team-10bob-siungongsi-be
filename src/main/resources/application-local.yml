@@ -45,7 +45,9 @@ korean:
 
 jwt:
   secret-key: dflknlsdfjlskfncdsjlkmxnfjsklcxmvnfddddddddc
+  secret-refresh-key: dfndskxcnjvbgfhdrjeikxcnvghfdikxmncvbghjfdkxm
   expiration-time: 604800000
+  refresh-expiration-time: 2419200000
 
 logging:
   level:

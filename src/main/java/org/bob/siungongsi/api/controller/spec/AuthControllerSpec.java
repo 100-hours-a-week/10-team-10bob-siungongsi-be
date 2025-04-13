@@ -1,6 +1,7 @@
 package org.bob.siungongsi.api.controller.spec;
 
 import org.bob.siungongsi.api.controller.dto.AuthRequest;
+import org.bob.siungongsi.api.controller.dto.AuthResponse;
 import org.bob.siungongsi.api.controller.dto.AuthResponse.LoginSuccessResponse;
 import org.bob.siungongsi.common.dto.ApiResponseWrapper;
 import org.springframework.http.ResponseEntity;
@@ -180,6 +181,54 @@ public interface AuthControllerSpec {
             })
       })
   ResponseEntity<ApiResponseWrapper<?>> getTerms();
+
+  @Operation(
+      summary = "토큰 갱신",
+      description = "jwt 토큰 만료 시 토큰 갱신하는 API",
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "토큰 갱신 성공",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ApiResponseWrapper.class),
+                  examples = {
+                    @ExampleObject(
+                        name = "토큰 갱신 성공",
+                        value =
+                            "{ \"code\": 2204, \"message\": \"refresh_token_success\", \"data\": { \"accessToken\": \"your_token_here\",\"refreshToken\": \"your_token_here\" } }")
+                  })
+            }),
+        @ApiResponse(
+            responseCode = "401",
+            description = "액세스 토큰 만료 또는 인증 필요",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ApiResponseWrapper.class),
+                  examples = {
+                    @ExampleObject(
+                        name = "인증 실패",
+                        value = "{ \"code\": 2400, \"message\": \"required_authorization\" }")
+                  })
+            }),
+        @ApiResponse(
+            responseCode = "500",
+            description = "서버 내부 오류",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ApiResponseWrapper.class),
+                  examples = {
+                    @ExampleObject(
+                        name = "서버 오류",
+                        value = "{ \"code\": 2500, \"message\": \"internal_server_error\" }")
+                  })
+            })
+      })
+  ResponseEntity<ApiResponseWrapper<AuthResponse.RegisterSuccessResponse>> refreshToken(
+      AuthRequest.RefreshRequest refreshToken);
 
   /** 회원 탈퇴 API */
   @DeleteMapping("/withdraw")

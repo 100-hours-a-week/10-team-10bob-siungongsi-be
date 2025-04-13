@@ -41,9 +41,9 @@ public class DevSupportController implements DevSupportControllerSpec {
 
     String jwtToken;
     if (expirationTime != null) {
-      jwtToken = jwtProvider.createJwtToken(userId, expirationTime);
+      jwtToken = jwtProvider.createJwtAccessToken(userId, expirationTime);
     } else {
-      jwtToken = jwtProvider.createJwtToken(userId);
+      jwtToken = jwtProvider.createJwtAccessToken(userId);
     }
 
     ApiResponseWrapper<?> response = new ApiResponseWrapper<>(12341243, "토큰 획득", jwtToken);

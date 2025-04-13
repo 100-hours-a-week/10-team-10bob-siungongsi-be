@@ -47,19 +47,21 @@ public class AuthService {
   }
 
   @Transactional
-  public String register(AuthRequest.RegisterRequest authRequest, String accessToken) {
+  public AuthResponse.RegisterSuccessResponse register(
+      AuthRequest.RegisterRequest authRequest, String kakaoToken) {
 
-    if (accessToken == null || accessToken.isEmpty()) {
+    if (kakaoToken == null || kakaoToken.isEmpty()) {
       throw new CustomException(ApiResponseCode.AUTH_REQUIRED_AUTHORIZATION);
     }
 
-    String socialId = kakaoAuthService.getSocialIdFromAccessToken(accessToken);
+    String socialId = kakaoAuthService.getSocialIdFromAccessToken(kakaoToken);
 
     if (userRepository.existsBySocialId(socialId)) {
       throw new CustomException(ApiResponseCode.AUTH_USER_ALREADY_EXISTS);
     }
 
-    Long userId = userRepository.save(new UserEntity(socialId, accessToken.substring(7))).getId();
+    UserEntity user = userRepository.save(new UserEntity(socialId, ""));
+    Long userId = user.getId();
 
     List<UserAgreedTermEntity> userAgreedTerms =
         validateAndCreateUserAgreedTerms(authRequest.agreedTermIds(), userId);
@@ -67,7 +69,12 @@ public class AuthService {
       userAgreedTermRepository.saveAll(userAgreedTerms);
     }
 
-    return createJwt(userId.toString());
+    String accessToken = jwtProvider.createJwtAccessToken(userId.toString());
+    String refreshToken = jwtProvider.createJwtRefreshToken(userId.toString());
+
+    user.updateAccessToken(refreshToken);
+
+    return AuthResponse.RegisterSuccessResponse.of(accessToken, refreshToken);
   }
 
   private List<UserAgreedTermEntity> validateAndCreateUserAgreedTerms(
@@ -100,23 +107,38 @@ public class AuthService {
     }
   }
 
-  public AuthResponse.LoginSuccessResponse login(String accessToken) {
-    String socialId = kakaoAuthService.getSocialIdFromAccessToken(accessToken);
-
+  public AuthResponse.LoginSuccessResponse login(String kakaoToken) {
+    String socialId = kakaoAuthService.getSocialIdFromAccessToken(kakaoToken);
     UserEntity user = userRepository.findBySocialId(socialId).orElse(null);
 
     if (user == null) {
-      return AuthResponse.LoginSuccessResponse.of(null, false);
+      return AuthResponse.LoginSuccessResponse.of(null, null, false);
     }
 
-    user.updateAccessToken(accessToken.substring(7));
+    String accessToken = jwtProvider.createJwtAccessToken(user.getId().toString());
+    String refreshToken = jwtProvider.createJwtRefreshToken(user.getId().toString());
+    user.updateAccessToken(refreshToken);
     userRepository.save(user);
-    String jwt = jwtProvider.createJwtToken(user.getId().toString());
-    return AuthResponse.LoginSuccessResponse.of(jwt, true);
+    return AuthResponse.LoginSuccessResponse.of(accessToken, refreshToken, true);
   }
 
-  public String createJwt(String userId) {
-    return jwtProvider.createJwtToken(userId);
+  public AuthResponse.RegisterSuccessResponse refreshToken(String refreshToken) {
+    Long userId = jwtProvider.validateJwtToken(refreshToken, false);
+
+    UserEntity user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new CustomException(ApiResponseCode.AUTH_REFRESH_TOKEN_INVALID));
+
+    if (!user.getAccessToken().equals(refreshToken)) {
+      throw new CustomException(ApiResponseCode.AUTH_REFRESH_TOKEN_INVALID);
+    }
+
+    String accessToken = jwtProvider.createJwtAccessToken(user.getId().toString());
+    String refreshToken2 = jwtProvider.createJwtRefreshToken(user.getId().toString());
+    user.updateAccessToken(refreshToken2);
+    userRepository.save(user);
+    return AuthResponse.RegisterSuccessResponse.of(accessToken, refreshToken2);
   }
 
   @Transactional
