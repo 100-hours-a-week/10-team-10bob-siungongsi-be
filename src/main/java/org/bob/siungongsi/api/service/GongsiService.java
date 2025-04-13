@@ -228,7 +228,7 @@ public class GongsiService {
       }
     } catch (Exception e) {
       logger.warn("Error fetching prdyCtr: {}", e.getMessage());
-      prdyCtr = 0.0; // Default value
+      prdyCtr = -101; // Default value
     }
 
     CompanyResponse.CompanyInfo companyInfo =
