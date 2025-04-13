@@ -3,6 +3,7 @@ package org.bob.siungongsi.api.service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -227,13 +228,19 @@ public class GongsiService {
         prdyCtr = koreanInvestmentClient.getPrdyCtr(stockCode);
       }
     } catch (Exception e) {
-      logger.warn("Error fetching prdyCtr: {}", e.getMessage());
-      prdyCtr = 0.0; // Default value
+
+//      logger.warn("Error fetching prdyCtr: {}", e.getMessage());
+//      prdyCtr = 0.0; // Default value
+
+      throw new CustomException(ApiResponseCode.API_BAD_REQUEST);
+//      logger.error("Error fetching prdyCtr: {}", e.getMessage());
+//      prdyCtr = 0.0; // Default value
+
     }
 
     CompanyResponse.CompanyInfo companyInfo =
         CompanyResponse.CompanyInfo.of(
-            company.getId(), company.getCompanyName(), prdyCtr, isSubscribed);
+                    company.getId(), company.getCompanyName(), prdyCtr, new Date(), isSubscribed);
 
     return GongsiResponse.GongsiDetailResponse.of(gongsiInfo, companyInfo);
   }

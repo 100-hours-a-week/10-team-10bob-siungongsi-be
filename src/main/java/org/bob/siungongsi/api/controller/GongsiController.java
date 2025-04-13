@@ -87,7 +87,7 @@ public class GongsiController implements GongsiControllerSpec {
       CompanyResponse.CompanyInfo companyInfo = response.company();
       CompanyResponse.CompanyInfo updatedCompanyInfo =
           CompanyResponse.CompanyInfo.of(
-              companyInfo.id(), companyInfo.name(), companyInfo.prdyCtr(), isSubscribed);
+              companyInfo.id(), companyInfo.name(), companyInfo.prdyCtr(),companyInfo.date(), isSubscribed);
 
       response = GongsiDetailResponse.of(response.gongsi(), updatedCompanyInfo);
     }

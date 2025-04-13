@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bob.siungongsi.api.service.ApiKeyStoreManager;
+import org.bob.siungongsi.common.dto.ApiResponseCode;
+import org.bob.siungongsi.common.exception.CustomException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,20 +51,27 @@ public class KoreanInvestmentClient {
     this.restTemplate = new RestTemplate();
   }
 
-  @CircuitBreaker(name = "stockPriceService", fallbackMethod = "fallbackGetPrdyCtr")
+//  @CircuitBreaker(name = "stockPriceService", fallbackMethod = "fallbackGetPrdyCtr")
   public double getPrdyCtr(String stockCode) {
     try {
       String accessToken = tokenManager.getAccessToken(ApiKeyStoreManager.KI_API_KEY_NAME);
       return fetchStockData(accessToken, stockCode);
     } catch (Exception e) {
-      logger.warn("Error fetching prdyCtr from Korean Investment API: {}", e.getMessage());
+//      logger.warn("Error fetching prdyCtr from Korean Investment API: {}", e.getMessage());
+      System.out.println(e.getMessage());
       throw new RuntimeException("Failed to fetch prdyCtr: " + e.getMessage());
     }
   }
 
   public double fallbackGetPrdyCtr(String stockCode, Throwable t) {
-    logger.warn("Fallback method called for getPrdyCtr: {}", t.getMessage());
+//<<<<<<< Updated upstream
+//    logger.warn("Fallback method called for getPrdyCtr: {}", t.getMessage());
     return -101;
+//=======
+//    throw new CustomException(ApiResponseCode.GONGSI_NOT_FOUND);
+//    logger.error("Fallback method called for getPrdyCtr: {}", t.getMessage());
+//    return -101;
+//>>>>>>> Stashed changes
   }
 
   private double fetchStockData(String accessToken, String stockCode) {
