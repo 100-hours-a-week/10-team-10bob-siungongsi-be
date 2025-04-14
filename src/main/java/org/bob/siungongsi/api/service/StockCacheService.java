@@ -13,7 +13,7 @@ public class StockCacheService {
   }
 
   public void cacheStockPrice(String stockCode, Double value) {
-    redisUtils.set(PREFIX + stockCode, value, 300000L);
+    redisUtils.set(PREFIX + stockCode, value, 30000L);
   }
 
   public Object getCachedStockPrice(String stockCode) {

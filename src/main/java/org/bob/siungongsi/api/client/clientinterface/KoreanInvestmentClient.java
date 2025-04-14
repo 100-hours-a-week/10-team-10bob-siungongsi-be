@@ -57,25 +57,15 @@ public class KoreanInvestmentClient {
 
   @CircuitBreaker(name = "stockPriceService", fallbackMethod = "fallbackGetPrdyCtr")
   public double getPrdyCtr(String stockCode) {
-    try {
-      String accessToken = tokenManager.getAccessToken(ApiKeyStoreManager.KI_API_KEY_NAME);
-      return fetchStockData(accessToken, stockCode);
-    } catch (Exception e) {
-      logger.warn("Error fetching prdyCtr from Korean Investment API: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch prdyCtr: " + e.getMessage());
+    String accessToken = tokenManager.getAccessToken(ApiKeyStoreManager.KI_API_KEY_NAME);
+    if (stockCacheService.hasCachedStock(stockCode)) {
+      return (double) stockCacheService.getCachedStockPrice(stockCode);
     }
+    return fetchStockData(accessToken, stockCode);
   }
 
   public double fallbackGetPrdyCtr(String stockCode, Throwable t) {
     logger.warn("Fallback method called for getPrdyCtr: {}", t.getMessage());
-    if (stockCacheService.hasCachedStock(stockCode)) {
-      Object cachedValue = stockCacheService.getCachedStockPrice(stockCode);
-      if (cachedValue instanceof Double) {
-        return (Double) cachedValue;
-      } else {
-        return -101;
-      }
-    }
     return -101;
   }
 
@@ -102,11 +92,13 @@ public class KoreanInvestmentClient {
 
       JsonNode root = objectMapper.readTree(responseBody);
       JsonNode outputData = root.path("output");
+
       String prdyCtrt = outputData.path("prdy_ctrt").asText();
       Double prdyCtr = Double.parseDouble(prdyCtrt.replaceAll("[^0-9.-]", ""));
-      stockCacheService.cacheStockPrice(stockCode, prdyCtr);
-      return prdyCtr;
 
+      stockCacheService.cacheStockPrice(stockCode, prdyCtr);
+
+      return prdyCtr;
     } catch (RestClientException e) {
       logger.error("Error fetching stock data from Korean Investment API: {}", e.getMessage());
       throw new RuntimeException("Failed to fetch stock data: " + e.getMessage());
