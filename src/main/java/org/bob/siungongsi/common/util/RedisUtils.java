@@ -18,8 +18,8 @@ public class RedisUtils {
     redisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.MILLISECONDS);
   }
 
-  public String get(String key) {
-    return (String) redisTemplate.opsForValue().get(key);
+  public Object get(String key) {
+    return redisTemplate.opsForValue().get(key);
   }
 
   public boolean delete(String key) {

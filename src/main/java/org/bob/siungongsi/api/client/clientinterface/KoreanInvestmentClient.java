@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bob.siungongsi.api.service.ApiKeyStoreManager;
+import org.bob.siungongsi.api.service.StockCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ public class KoreanInvestmentClient {
   private final ObjectMapper objectMapper;
   private final RestTemplate restTemplate;
   private final ApiKeyStoreManager tokenManager;
+  private final StockCacheService stockCacheService;
 
   @Value("${korean.investment.appkey}")
   private String appKey;
@@ -43,21 +45,23 @@ public class KoreanInvestmentClient {
   @Value("${korean.investment.token.url}")
   private String tokenUrl;
 
-  public KoreanInvestmentClient(ObjectMapper objectMapper, ApiKeyStoreManager tokenManager) {
+  public KoreanInvestmentClient(
+      ObjectMapper objectMapper,
+      ApiKeyStoreManager tokenManager,
+      StockCacheService stockCacheService) {
     this.objectMapper = objectMapper;
     this.tokenManager = tokenManager;
+    this.stockCacheService = stockCacheService;
     this.restTemplate = new RestTemplate();
   }
 
   @CircuitBreaker(name = "stockPriceService", fallbackMethod = "fallbackGetPrdyCtr")
   public double getPrdyCtr(String stockCode) {
-    try {
-      String accessToken = tokenManager.getAccessToken(ApiKeyStoreManager.KI_API_KEY_NAME);
-      return fetchStockData(accessToken, stockCode);
-    } catch (Exception e) {
-      logger.warn("Error fetching prdyCtr from Korean Investment API: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch prdyCtr: " + e.getMessage());
+    String accessToken = tokenManager.getAccessToken(ApiKeyStoreManager.KI_API_KEY_NAME);
+    if (stockCacheService.hasCachedStock(stockCode)) {
+      return (double) stockCacheService.getCachedStockPrice(stockCode);
     }
+    return fetchStockData(accessToken, stockCode);
   }
 
   public double fallbackGetPrdyCtr(String stockCode, Throwable t) {
@@ -88,10 +92,13 @@ public class KoreanInvestmentClient {
 
       JsonNode root = objectMapper.readTree(responseBody);
       JsonNode outputData = root.path("output");
+
       String prdyCtrt = outputData.path("prdy_ctrt").asText();
+      Double prdyCtr = Double.parseDouble(prdyCtrt.replaceAll("[^0-9.-]", ""));
 
-      return Double.parseDouble(prdyCtrt.replaceAll("[^0-9.-]", ""));
+      stockCacheService.cacheStockPrice(stockCode, prdyCtr);
 
+      return prdyCtr;
     } catch (RestClientException e) {
       logger.error("Error fetching stock data from Korean Investment API: {}", e.getMessage());
       throw new RuntimeException("Failed to fetch stock data: " + e.getMessage());
