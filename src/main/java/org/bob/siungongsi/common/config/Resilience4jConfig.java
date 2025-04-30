@@ -20,8 +20,8 @@ public class Resilience4jConfig {
             .permittedNumberOfCallsInHalfOpenState(1) // Half-Open 상태에서 1번 테스트
             .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED) // 카운트 기반 윈도우
             .slidingWindowSize(2) // 2개 요청 단위로 실패율 계산
-            .minimumNumberOfCalls(2) // 최소 2번 호출해야 실패율 계산
-            .waitDurationInOpenState(Duration.ofMillis(500)) // 500ms 동안 차단 유지
+            .minimumNumberOfCalls(1) // 최소 2번 호출해야 실패율 계산
+            .waitDurationInOpenState(Duration.ofMillis(300)) // 500ms 동안 차단 유지
             .automaticTransitionFromOpenToHalfOpenEnabled(true) // 자동으로 Half-Open 전환
             .build();
 
