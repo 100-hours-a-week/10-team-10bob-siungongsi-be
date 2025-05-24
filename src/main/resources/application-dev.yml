@@ -1,0 +1,66 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+sentry:
+  dsn: ${SENTRY_DSN}
+  tracesSampleRate: 1.0
+  environment: develop
+  release: siungongsi-be
+
+doc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+
+swagger:
+  server-url: ${DEV_API_SERVER_URL}
+
+korean:
+  investment:
+    appkey: ${KOREAN_INVESTMENT_APPKEY}
+    secretkey: ${KOREAN_INVESTMENT_SECRETKEY}
+    token:
+      url: https://openapi.koreainvestment.com:9443/oauth2/tokenP
+    stock:
+      url: https://openapi.koreainvestment.com:9443/uapi/domestic-stock/v1/quotations/inquire-price
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  expiration-time: ${JWT_EXPIRATION_TIME}
+
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT}
+  ssl: true
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+    org.springframework.web: INFO

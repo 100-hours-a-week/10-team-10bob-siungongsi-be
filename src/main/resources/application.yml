@@ -1,1 +1,10 @@
-spring.application.name: siungongsi
+spring:
+  application:
+    name: siungongsi
+
+server:
+  shutdown: graceful
+
+cors:
+  allowed-origins:
+    - https://www.siungongsi.site

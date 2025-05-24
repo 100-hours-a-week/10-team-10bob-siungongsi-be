@@ -1,8 +1,17 @@
+// sentry
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.diffplug.spotless' version '6.21.0' // spotless 플러그인 추가
+    // sentry
+    id "io.sentry.jvm.gradle" version "5.3.0"
 }
 
 group = 'org.bob'
@@ -20,8 +29,50 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+
+    // swagger
+    // 기존 2.2.0 버전은 Spring Boot 3.4.x 버전에서 Controller Handler 호환성 문제가 있어 최신 버전으로 맞춘다.
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+    //JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    //S3를 위한 라이브러리
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.671'  // AWS S3 SDK
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'  // Spring Cloud AWS
+
+    // ✅ Spring Cloud AWS 3.x (AWS SDK v2 기반)
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.0.2'
+
+    // 불필요한 HTML 태그 제거를 위한 라이브러리
+    implementation 'org.jsoup:jsoup:1.18.3'
+
+    // 공시 등록 푸시 알림을 보내기 위한 라이브러리
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // DB
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    testImplementation 'com.h2database:h2:2.3.232'
+
+    // sentry
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.4.0'
+
+    //circuit breaker
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
+    implementation("io.github.resilience4j:resilience4j-circuitbreaker:2.2.0")
+
 }
 
 jar {
@@ -45,12 +96,23 @@ tasks.named('test') {
 // 깃 커밋 시 포매팅
 spotless {
     java {
-        target 'src/**/*.java' // 포매팅 대상 디렉토리
-        googleJavaFormat().aosp() // 구글 스타일 포매팅, aosp()는 Android Open Source Project의 스타일을 따르는 옵션
-        indentWithTabs(4)
-        importOrder('java', 'javax', 'org', 'com')
-        removeUnusedImports()
+        target("src/**/*.java") // 포매팅 대상 디렉토리
+        googleJavaFormat() // Google Java Format 적용 (기본 2칸)
+
+        importOrder("java", "javax", "org", "com") // import 순서 지정
         trimTrailingWhitespace()
         endWithNewline()
+        removeUnusedImports() // 사용하지 않는 import 제거
     }
+}
+
+sentry {
+    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+    // This enables source context, allowing you to see your source
+    // code as part of your stack traces in Sentry.
+    includeSourceContext = true
+
+    org = "ktb-2nd"
+    projectName = "siungongsi-be"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
